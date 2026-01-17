@@ -521,6 +521,8 @@ export const getConversations = createAsyncThunk(
     }
 
     try {
+      console.log("📋 Fetching conversations for project:", projectId);
+      
       const response = await fetch(
         `${API_BASE}/conversations?project_id=${projectId}`,
         {
@@ -535,14 +537,17 @@ export const getConversations = createAsyncThunk(
         const errorData = await response
           .json()
           .catch(() => ({ detail: "Failed to fetch conversations" }));
+        console.error("❌ Failed to fetch conversations:", errorData);
         return thunkAPI.rejectWithValue(
           errorData.detail || "Failed to fetch conversations"
         );
       }
 
       const result = await response.json();
+      console.log("✅ Conversations fetched:", result.data?.length || 0, "conversations");
       return result.data || [];
     } catch (error) {
+      console.error("❌ Error fetching conversations:", error);
       const message =
         (error.response &&
           error.response.data &&
@@ -1593,10 +1598,12 @@ export const chatSlice = createSlice({
 
         state.conversations = finalConversations;
         state.conversationsStatus = "succeeded";
+        console.log("✅ Conversations updated:", finalConversations.length, "conversations");
       })
       .addCase(getConversations.rejected, (state, action) => {
         state.conversationsStatus = "failed";
         state.error = action.payload;
+        console.error("❌ Failed to get conversations:", action.payload);
       })
       // getImportantMessages Thunk
       .addCase(getImportantMessages.pending, (state) => {

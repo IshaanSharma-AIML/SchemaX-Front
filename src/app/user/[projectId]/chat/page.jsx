@@ -608,9 +608,9 @@ const MessageBubble = ({
             {isAi && message.visualization && (
               <div className="mt-4">
                 <VisualizationComponent visualization={message.visualization} />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
           {/* Timestamp and actions */}
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700/50">
             <div className="flex items-center gap-3">
@@ -1500,9 +1500,9 @@ useEffect(() => {
                             <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100">{chatHeaderTitle}</h3>
                         </div>
                     </div>
-                    {/* Voice Settings - Only render on client to avoid hydration mismatch */}
-                    {typeof window !== 'undefined' && tts.isSupported && (
-                        <div className="flex items-center gap-2">
+                        {/* Voice Settings - Only render on client to avoid hydration mismatch */}
+                        {typeof window !== 'undefined' && tts.isSupported && (
+                            <div className="flex items-center gap-2">
                             {/* Voice Selector Dropdown */}
                             <div className="relative">
                                 <select
@@ -1552,7 +1552,7 @@ useEffect(() => {
                                 )}
                             </button>
                         </div>
-                    )}
+                        )}
                 </div>
 
                 {/* Chat Messages */}

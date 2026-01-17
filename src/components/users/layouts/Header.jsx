@@ -10,7 +10,8 @@ import {
     FaSignOutAlt, 
     FaMoon, 
     FaSun, 
-    FaUser
+    FaUser,
+    FaUserShield
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/lib/store/users-panel/auth/authSlice";
@@ -176,6 +177,17 @@ const Header = () => {
                                             <FaUser className="text-xs" />
                                             Profile
                                         </Link>
+                                        {isClient && user?.role === 'admin' && (
+                                            <Link
+                                                href="/user/admin"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-2 text-sm transition-colors
+                                                    text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                                            >
+                                                <FaUserShield className="text-xs" />
+                                                Admin Panel
+                                            </Link>
+                                        )}
                                         <Link
                                             href={projectId ? `/user/project/${projectId}/edit` : "/user/settings"}
                                             onClick={() => setIsMenuOpen(false)}
