@@ -17,25 +17,14 @@ import { toast } from 'react-hot-toast';
 
 // Enhanced Visualization Component with Labels
 const VisualizationComponent = ({ visualization }) => {
-  // DEBUG: Log what we're receiving
-  console.log("🔍 VisualizationComponent received:", {
-    visualization,
-    keys: visualization ? Object.keys(visualization) : 'no visualization',
-    hasData: visualization?.data || visualization?.chart_data,
-    dataType: typeof (visualization?.data || visualization?.chart_data),
-    nestedViz: visualization?.visualization
-  });
-
   // Handle multiple possible data structures
   const getVisualizationData = () => {
     if (!visualization) {
-      console.log(" No visualization data provided");
       return null;
     }
 
     // Case 1: Direct data (base64 string)
     if (visualization.data) {
-      console.log(" Case 1: Direct data property");
       return {
         type: visualization.type || 'chart',
         data: visualization.data,
@@ -46,7 +35,6 @@ const VisualizationComponent = ({ visualization }) => {
 
     // Case 2: chart_data property (common in backend responses)
     if (visualization.chart_data) {
-      console.log(" Case 2: chart_data property");
       return {
         type: visualization.chart_type || visualization.type || 'chart',
         data: visualization.chart_data,
@@ -57,7 +45,6 @@ const VisualizationComponent = ({ visualization }) => {
 
     // Case 3: Nested visualization object
     if (visualization.visualization) {
-      console.log(" Case 3: Nested visualization property");
       const viz = visualization.visualization;
       return {
         type: viz.type || viz.chart_type || 'chart',
@@ -68,14 +55,12 @@ const VisualizationComponent = ({ visualization }) => {
     }
 
     // Case 4: The data might be in a different property
-    console.log("⚠️ Could not find data in expected properties");
     return null;
   };
 
   const vizData = getVisualizationData();
   
   if (!vizData || !vizData.data) {
-    console.log(" No valid visualization data to render");
     return null;
   }
 
@@ -83,13 +68,6 @@ const VisualizationComponent = ({ visualization }) => {
   const isBase64 = typeof vizData.data === 'string' && 
                   (vizData.data.startsWith('data:image/') || 
                    vizData.data.length > 100 && /[A-Za-z0-9+/=]/.test(vizData.data));
-  
-  console.log(" Visualization data ready:", {
-    type: vizData.type,
-    dataLength: vizData.data?.length,
-    isBase64: isBase64,
-    preview: vizData.data?.substring(0, 50) + '...'
-  });
 
   // Get chart type info
   const getChartTypeInfo = (chartType) => {
@@ -517,27 +495,6 @@ const MessageBubble = ({
 }) => {
   const isAi = message.role === "ai";
 
-  // Add debug logging for visualizations
-  useEffect(() => {
-    if (isAi && message.visualization) {
-      console.log("MessageBubble - Visualization data:", {
-        messageId: message.id,
-        hasVisualization: !!message.visualization,
-        visualizationType:
-          message.visualization?.type ||
-          message.visualization?.visualization?.type,
-        dataLength:
-          message.visualization?.data?.length ||
-          message.visualization?.visualization?.data?.length,
-        keys: Object.keys(message.visualization),
-        hasChartData: !!message.visualization.chart_data,
-        chartDataLength: message.visualization.chart_data?.length,
-        hasChartType: !!message.visualization.chart_type,
-        hasVisualizationObject: !!message.visualization.visualization,
-      });
-    }
-  }, [isAi, message.visualization, message.id]);
-
   // Modern LLM-style layout - full width with centered content
   const containerClasses = "w-full flex justify-center";
   const bubbleAlignmentClasses = isAi ? "flex-row" : "flex-row-reverse";
@@ -647,53 +604,54 @@ const MessageBubble = ({
               {message.content}
             </ReactMarkdown>
 
-            {/* Visualization Component with Debug Info */}
+            {/* Visualization Component */}
             {isAi && message.visualization && (
               <div className="mt-4">
                 <VisualizationComponent visualization={message.visualization} />
-                
-                {/* Debug info - only show in development */}
-                {process.env.NODE_ENV === 'development' && (
-                  <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
-                    <details>
-                      <summary className="cursor-pointer text-gray-600 dark:text-gray-400">
-                        Debug: Visualization Data
-                      </summary>
-                      <pre className="mt-1 text-xs overflow-auto">
-                        {JSON.stringify({
-                          messageId: message.id,
-                          hasVisualization: !!message.visualization,
-                          keys: Object.keys(message.visualization),
-                          type: message.visualization.type,
-                          dataLength: message.visualization.data?.length,
-                          chartType: message.visualization.chart_type,
-                          chartDataLength: message.visualization.chart_data?.length,
-                          hasVisualizationObject: !!message.visualization.visualization,
-                          visualizationObjectKeys: message.visualization.visualization 
-                            ? Object.keys(message.visualization.visualization) 
-                            : null,
-                          // Show first 100 chars of data to verify format
-                          dataPreview: message.visualization.data 
-                            ? message.visualization.data.substring(0, 100) + '...' 
-                            : null,
-                          chartDataPreview: message.visualization.chart_data 
-                            ? message.visualization.chart_data.substring(0, 100) + '...' 
-                            : null
-                        }, null, 2)}
-                      </pre>
-                    </details>
-                  </div>
-                )}
               </div>
             )}
           </div>
           {/* Timestamp and actions */}
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700/50">
-            <div
-              className="text-xs text-gray-400 dark:text-gray-500 cursor-help"
-              title={isValid(dateObj) ? format(dateObj, "PPpp") : ""} // Full date/time on hover
-            >
-              {formattedDateTime}
+            <div className="flex items-center gap-3">
+              <div
+                className="text-xs text-gray-400 dark:text-gray-500 cursor-help"
+                title={isValid(dateObj) ? format(dateObj, "PPpp") : ""} // Full date/time on hover
+              >
+                {formattedDateTime}
+              </div>
+              {/* Accuracy Metric - Only show for AI messages with accuracy data */}
+              {isAi && message.accuracy !== null && message.accuracy !== undefined && (
+                <div 
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800"
+                  title="Response accuracy based on query success, execution, and response quality"
+                >
+                  <svg 
+                    className="w-3 h-3 text-blue-600 dark:text-blue-400" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                    />
+                  </svg>
+                  <span className={`text-xs font-semibold ${
+                    message.accuracy >= 80 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : message.accuracy >= 60 
+                      ? 'text-blue-600 dark:text-blue-400' 
+                      : message.accuracy >= 40
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {message.accuracy.toFixed(1)}%
+                  </span>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {/* Text-to-Speech Button (only for AI messages) */}

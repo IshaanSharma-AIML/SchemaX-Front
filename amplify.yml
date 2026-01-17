@@ -3,9 +3,14 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Install dependencies
         - npm ci
+        # Verify Node version (Next.js 15 requires Node 18+)
+        - node --version
+        - npm --version
     build:
       commands:
+        # Build Next.js application
         - npm run build
   artifacts:
     baseDirectory: .next

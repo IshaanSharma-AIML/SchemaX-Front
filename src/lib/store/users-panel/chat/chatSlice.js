@@ -1010,6 +1010,7 @@ export const chatSlice = createSlice({
         generatedSql: action.payload.generatedSql || null,
         isImportant: action.payload.isImportant || false,
         visualization: action.payload.visualization || null,
+        accuracy: action.payload.accuracy || null,
       };
 
       state.messages.push(newMessage);
@@ -1091,6 +1092,8 @@ export const chatSlice = createSlice({
           isImportant: false,
           // CRITICAL: Include visualization data if present
           visualization: action.payload.visualization || null,
+          // Include accuracy metric (0-100)
+          accuracy: action.payload.accuracy || null,
         };
 
         if (lastUserMessageIndex !== -1 && action.payload.userMessageId) {
@@ -1770,6 +1773,10 @@ export const chatSlice = createSlice({
           const message = state.messages.find((m) => m.id === messageId);
           if (message) {
             message.visualization = visualizationData;
+            // Update accuracy if provided
+            if (action.payload?.accuracy !== null && action.payload?.accuracy !== undefined) {
+              message.accuracy = action.payload.accuracy;
+            }
             return;
           }
         }
@@ -1778,6 +1785,10 @@ export const chatSlice = createSlice({
         for (let i = state.messages.length - 1; i >= 0; i--) {
           if (state.messages[i].role === "ai") {
             state.messages[i].visualization = visualizationData;
+            // Update accuracy if provided
+            if (action.payload?.accuracy !== null && action.payload?.accuracy !== undefined) {
+              state.messages[i].accuracy = action.payload.accuracy;
+            }
             break;
           }
         }
